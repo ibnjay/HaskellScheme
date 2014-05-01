@@ -1,5 +1,5 @@
 module Primitives (primitiveBindings) where
-import Monad (liftM)
+import Control.Monad (liftM)
 import Datatypes
 import Eval (bindVars)
 import IOPrimitives

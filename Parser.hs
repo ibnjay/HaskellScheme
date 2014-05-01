@@ -1,11 +1,11 @@
 module Parser ( parseScheme, parseSchemeList ) where
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Numeric(readInt, readDec, readOct, readHex, readFloat)
-import Ratio
-import Complex
-import Char (digitToInt)
-import List (sort)
-import Monad (liftM)
+import Data.Ratio
+import Data.Complex
+import Data.Char (digitToInt)
+import Data.List (sort)
+import Control.Monad (liftM)
 import qualified Data.Map as Map
 import Datatypes
 

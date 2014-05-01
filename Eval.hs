@@ -1,6 +1,6 @@
 module Eval (eval, bindVars, apply, load) where 
 import Datatypes
-import Monad (liftM)
+import Control.Monad (liftM)
 import Data.IORef
 import Parser (parseSchemeList)
 

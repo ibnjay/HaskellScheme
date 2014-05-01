@@ -1,8 +1,8 @@
 module IOPrimitives (ioPrimitives) where
-import IO
+import System.IO
 import Datatypes
 import Eval (apply, load)
-import Monad (liftM)
+import Control.Monad (liftM)
 import Parser (parseScheme)
 
 ioPrimitives :: [(String, [LispVal] -> IOThrowsError LispVal)]

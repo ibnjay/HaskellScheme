@@ -4,8 +4,8 @@ import Parser
 import Eval
 import Datatypes
 import Primitives
-import IO hiding (try)
-import Monad(liftM)
+import System.IO hiding (try)
+import Control.Monad(liftM)
 
 --REPL components.  Do we want a separate file?
 
