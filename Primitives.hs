@@ -33,6 +33,7 @@ primitives = [("+", numericBinop (+)),
               ("string>?", strBoolBinop (>)),
               ("string<=?", strBoolBinop (<=)),
               ("string>=?", strBoolBinop (>=)),
+              ("string-append", strAppend),
               ("car", car),
               ("cdr", cdr),
               ("cons", cons),
@@ -132,3 +133,13 @@ unpackStr notString = throwError $ TypeMismatch "string" notString
 unpackBool :: LispVal -> ThrowsError Bool
 unpackBool (Bool b) = return b
 unpackBool notBool = throwError $ TypeMismatch "boolean" notBool
+
+strAppend :: [LispVal] -> ThrowsError LispVal
+strAppend [String s] = return $ String s
+strAppend (String s:ss) = do
+  rest <- strAppend ss
+  case rest of
+    String s' -> return $ String $ s ++ s'
+    _ -> throwError $ TypeMismatch "string" rest
+strAppend [badType] = throwError $ TypeMismatch "string" badType
+strAppend badArgList = throwError $ NumArgs 1 badArgList
