@@ -1,8 +1,8 @@
 (define secret-word "Scheme in Haskell is fun!")
 
 (define (guessing-game)
-    (write "Guess the secret word: ")
-    (if (string=? (apply read) secret-word)
+    (write "Guess the secret phrase: ")
+    (if (string=? (apply read-line) secret-word)
         (write "Bar")
         (guessing-game)))
 
