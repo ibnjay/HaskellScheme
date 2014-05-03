@@ -1,6 +1,6 @@
 module Datatypes ( LispVal(..), LispError(..), ThrowsError, IOThrowsError, Env, nullEnv, throwError, catchError, trapError, extractValue, runErrorT, liftThrows, liftIO ) where
 import Control.Monad.Error
-import Text.ParserCombinators.Parsec(ParseError)
+import Text.ParserCombinators.Parsec (ParseError)
 import Data.IORef
 import System.IO (Handle)
 
@@ -8,7 +8,7 @@ import System.IO (Handle)
 
 data LispVal = Atom String
              | List [LispVal]
-             | DottedList [LispVal] LispVal -- Apparently a valid datatype in Scheme
+             | DottedList [LispVal] LispVal
              | Number Integer
              | Float Float
              | Rational Rational
@@ -16,7 +16,7 @@ data LispVal = Atom String
              | Bool Bool
              | Char Char
              | PrimitiveFunc ([LispVal] -> ThrowsError LispVal)
-             | Func {params :: [String], vararg :: (Maybe String), 
+             | Func { params :: [String], vararg :: (Maybe String), 
                       body :: [LispVal], closure :: Env}
              | IOFunc ([LispVal] -> IOThrowsError LispVal)
              | Port Handle

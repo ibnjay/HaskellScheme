@@ -1,3 +1,4 @@
+{-# LANGUAGE ExistentialQuantification #-}
 module Primitives (primitiveBindings) where
 import Control.Monad (liftM)
 import Datatypes

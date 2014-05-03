@@ -5,9 +5,7 @@ import Eval
 import Datatypes
 import Primitives
 import System.IO hiding (try)
-import Control.Monad(liftM)
-
---REPL components.  Do we want a separate file?
+import Control.Monad (liftM)
 
 runIOThrows :: IOThrowsError String -> IO String
 runIOThrows action = runErrorT (trapError action) >>= return . extractValue
@@ -26,22 +24,22 @@ evalAndPrint env expr = evalString env expr >>= putStrLn
 
 until_ :: Monad m => (a -> Bool) -> m a -> (a -> m ()) -> m ()
 until_ pred prompt action = do
-  result <- prompt
-  if pred result
-     then return ()
-     else action result >> until_ pred prompt action
+    result <- prompt
+    if pred result
+        then return ()
+        else action result >> until_ pred prompt action
 
 runFile :: [String] -> IO ()
 runFile args = do
-  env <- primitiveBindings >>= flip bindVars [("args", List $ map String $ drop 1 args)]
-  (runIOThrows $ liftM show $ eval env (List [Atom "load", String (args !! 0)]))
+    env <- primitiveBindings >>= flip bindVars [("args", List $ map String $ drop 1 args)]
+    (runIOThrows $ liftM show $ eval env (List [Atom "load", String (args !! 0)]))
        >>= hPutStrLn stderr
 
 runRepl :: IO ()
 runRepl = primitiveBindings >>= until_ (== "quit") (readPrompt "Lisp>>> ") . evalAndPrint
 
--- This file contains the main loop of the interpreter
-
-main :: IO ()
-main = do args <- getArgs
-          if null args then runRepl else runFile $ args
+main = do
+    args <- getArgs
+    if null args
+        then runRepl
+        else runFile args
