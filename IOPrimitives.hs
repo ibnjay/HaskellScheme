@@ -13,7 +13,9 @@ ioPrimitives = [("apply", applyProc),
                 ("close-output-port", closePort),
                 ("read", readProcAndParse),
                 ("read-line", readProc),
+                ("print", writeProcPrint),
                 ("write", writeProc),
+                ("write-line", writeProcLine),
                 ("read-contents", readContents),
                 ("read-all", readAll)]
 
@@ -40,7 +42,15 @@ readProcAndParse x = readProc x >>= \(String x) -> liftThrows (parseScheme x)
 
 writeProc :: [LispVal] -> IOThrowsError LispVal
 writeProc [obj] = writeProc [obj, Port stdout]
-writeProc [obj, Port port] = liftIO $ hPrint port obj >> (return $ Bool True)
+writeProc [String obj, Port port] = do
+    liftIO $ hPutStr port obj
+    return $ Bool True
+
+writeProcLine :: [LispVal] -> IOThrowsError LispVal
+writeProcLine (String x:xs) = writeProc ((String $ x ++ "\n") : xs)
+
+writeProcPrint :: [LispVal] -> IOThrowsError LispVal
+writeProcPrint (x:xs) = writeProc ((String $ show x) : xs)
 
 readContents :: [LispVal] -> IOThrowsError LispVal
 readContents [String filename] = liftM String $ liftIO $ readFile filename
