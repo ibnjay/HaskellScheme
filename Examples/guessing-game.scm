@@ -1,18 +1,17 @@
 (define secret-word "Scheme in Haskell is fun!")
 
-(define (guessing-game-helper guess)
-    (write-line (string-append "You guessed wrong: " guess))
-    (write "Try again: ")
-    (guessing-game))
+(define (guessing-game-wrong n)
+    (write (if (= n 0) "Try again: " 
+        (string-append
+            "Try again ("
+            (number->string n)
+            "): ")))
+    (guessing-game (+ n 1)))
 
-(define (guessing-game)
-    (define result (apply read-line))
-    (if (string=? result secret-word)
+(define (guessing-game n)
+    (if (string=? (apply read-line) secret-word)
         (write-line "You were correct!")
-        (guessing-game-helper result)))
+        (guessing-game-wrong n)))
 
-(define (main)
-    (write "Guess the secret phrase: ")
-    (guessing-game))
-
-(main)
+(write "Guess the secret phrase: ")
+(guessing-game 0)
