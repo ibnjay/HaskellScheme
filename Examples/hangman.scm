@@ -8,12 +8,24 @@
         word)))
 
 (define (get-word pred)
-    (define contents (apply read-contents "input/three.txt"))
-    (define lines (string-split "\n" contents))
-    (define words (concat (map (lambda (x) (string-split " " x)) lines)))
-    (define words2 (filter pred words))
-    (define idx (get-random 0 (length words2)))
-    (list-index idx words2))
+    (define xs (lines (apply read-contents "input/wordsEn.txt")))
+    (define theword (string-init (random-choice xs)))
+    (if (pred theword) theword (get-word pred)))
+
+(define (game-over? picked-letters word)
+    (if (null? word)
+        #t
+        (&& (in-array (car word) picked-letters)
+            (game-over? picked-letters (cdr word)))))
+
+(define (game-repeated-letter picked-letters word letter)
+    (write-line "... you already guessed that.")
+    (game picked-letters word))
+
+(define (game-letter-try picked-letters word letter)
+    (write-line (if (in-array letter word)
+        "... success!" "... try again!"))
+    (game (cons letter picked-letters) word))
 
 (define (game picked-letters word)
     (write-line "")
@@ -22,15 +34,13 @@
     (write "Guess a letter: ")
     (define guess (apply read-line))
     (write (string-append "You guessed: " guess))
-    (define letter (string-charat 0 guess))
 
-    (write-line (if (in-array letter word)
-        "... success!" "... try again!"))
-    (print letter)
-    (print (in-array letter word))
-    (print word)
-    (game (cons letter picked-letters) word)
-    )
+    (define letter (string-charat 0 guess))
+    (if (game-over? (cons letter picked-letters) word)
+        (write-line "... game over, you won!")
+        (if (in-array letter picked-letters)
+            (game-repeated-letter picked-letters word letter)
+            (game-letter-try picked-letters word letter))))
 
 (write "Pick a difficulty [easy/medium/hard]: ")
 
