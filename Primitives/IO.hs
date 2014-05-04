@@ -43,7 +43,7 @@ readProcAndParse x = readProc x >>= \(String x) -> liftThrows (parseScheme x)
 writeProc :: [LispVal] -> IOThrowsError LispVal
 writeProc [obj] = writeProc [obj, Port stdout]
 writeProc [String obj, Port port] = do
-    liftIO $ hPutStr port obj
+    liftIO $ hPutStr port obj >> hFlush port
     return $ Bool True
 
 writeProcLine :: [LispVal] -> IOThrowsError LispVal
