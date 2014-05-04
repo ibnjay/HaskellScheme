@@ -59,6 +59,8 @@
 (define (concat lst) (foldr (lambda (x y) (append x y)) '() lst))
 ; (print (concat '( (4 5) (5 6) (6 7) )))
 
+(define (string-charat n s)
+    (list-index n (char-list s)))
 (define (string-concat lst) (foldr (lambda (x y) (string-append x y)) "" lst))
 
 (define (reverse lst) (fold (flip cons) '() lst))
