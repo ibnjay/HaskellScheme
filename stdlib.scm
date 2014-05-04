@@ -1,6 +1,10 @@
 (define (not x) (if x #f #t))
 (define (null? x) (if (eqv? x '()) #t #f))
 
+(define (between? a b n)
+        (&& (<= a n)
+            (>= b n)))
+
 (define (list . objs) objs)
 
 (define (id obj) obj)
