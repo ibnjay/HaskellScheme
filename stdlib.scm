@@ -46,7 +46,7 @@
 (define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
 
 (define (length lst) (fold (lambda (x y) (+ x 1)) 0 lst))
-(define (string-length s) (length (char-list s)))
+(define (string-length s) (length (string->list s)))
 
 (define (in-array x lst)
     (if (null? lst)
@@ -60,7 +60,7 @@
 ; (print (concat '( (4 5) (5 6) (6 7) )))
 
 (define (string-charat n s)
-    (list-index n (char-list s)))
+    (list-index n (string->list s)))
 (define (string-concat lst) (foldr (lambda (x y) (string-append x y)) "" lst))
 
 (define (reverse lst) (fold (flip cons) '() lst))

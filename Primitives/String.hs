@@ -14,10 +14,14 @@ strAppend (String s:ss) = do
 strAppend [badType] = throwError $ TypeMismatch "string" badType
 strAppend badArgList = throwError $ NumArgs 1 badArgList
 
-strToChars :: [LispVal] -> ThrowsError LispVal
-strToChars [String s] = return $ List $ map Char s
-strToChars [badType] = throwError $ TypeMismatch "string" badType
-strToChars badArgList = throwError $ NumArgs 1 badArgList
+stringToList :: [LispVal] -> ThrowsError LispVal
+stringToList [String s] = return $ List $ map Char s
+stringToList [badType] = throwError $ TypeMismatch "string" badType
+stringToList badArgList = throwError $ NumArgs 1 badArgList
+
+listToString :: [LispVal] -> ThrowsError LispVal
+listToString [List s] = return . String $ map (\(Char c) -> c) s
+listToString badArgList = throwError $ NumArgs 1 badArgList
 
 strCons :: [LispVal] -> ThrowsError LispVal
 strCons [Char c, String s] = return $ String (c : s)
@@ -35,6 +39,7 @@ stringPrimitives =
     , ("string>=?", strBoolBinop (>=))
     , ("string-append", strAppend)
     , ("string-split", strSplit)
-    , ("char-list", strToChars)
+    , ("string->list", stringToList)
+    , ("list->string", listToString)
     , ("string-cons", strCons)
     ]
