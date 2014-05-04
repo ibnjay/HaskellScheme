@@ -1,144 +1,71 @@
 module Parser ( parseScheme, parseSchemeList ) where
 import Text.ParserCombinators.Parsec hiding (spaces)
-import Numeric(readInt, readDec, readOct, readHex, readFloat)
-import Data.Ratio
-import Data.Complex
-import Data.Char (digitToInt)
-import Data.List (sort)
 import Control.Monad (liftM)
-import qualified Data.Map as Map
 import Datatypes
 
--- Supporting Functions
-
-readBin :: (Integral a) => ReadS a
-readBin = readInt 2 (\c -> c == '0' || c == '1') digitToInt
-
-fh :: [(a, b)] -> a
-fh x = fst (head (x))
-
-readBinFloat = readFloat -- Placeholders.
-readOctFloat = readFloat
-readHexFloat = readFloat
-
---Supporting Definitions
-
-charIDs = Map.fromList([("space",' '),("newline",'\n'),("tab",'\t')])
-expChars = "sdflSDFL"
-
---Shortcut Functions
- 
-parseDec = parseNumber 10.0 (readDec, readFloat) digit
-parseBin = parseNumber 2.0 (readBin, readBinFloat) (oneOf ("01"))
-parseOct = parseNumber 8.0 (readOct, readOctFloat) octDigit
-parseHex = parseNumber 16.0 (readHex, readHexFloat) hexDigit
-
-
--- Char
 symbol :: Parser Char
 symbol = initialSymbol <|> oneOf "+-.@"
  
 -- '+', '-', and '.' aren't allowed to be the first character of an atom
 initialSymbol :: Parser Char
-initialSymbol = oneOf "!$%&*/:<=>?^_~"
+initialSymbol = oneOf "!#$%&*/:<=>?^_~"
  
 spaces :: Parser ()
 spaces = skipMany1 space
 
 escapeChar :: Parser Char
-escapeChar = do char '\\'
-                esc <- anyChar
-                return $ case esc of
-                           'n' -> '\n'
-                           'r' -> '\r'
-                           't' -> '\t'
-                           otherwise -> esc
- 
+escapeChar = char '\\' >> fmap escape anyChar
+    where escape 'n' = '\n'
+          escape 'r' = '\r'
+          escape 't' = '\t'
+          escape x   = x
  
 parseString :: Parser LispVal
-parseString = do char '"'
-                 x <- many (escapeChar <|> noneOf "\"")
-                 char '"'
-                 return $ String x
+parseString = do
+    char '"'
+    x <- many (escapeChar <|> noneOf "\"")
+    char '"'
+    return $ String x
  
 parseAtom :: Parser LispVal
-parseAtom = do first <- letter <|> initialSymbol
-               rest <- many (letter <|> digit <|> symbol)
-               let atom = first:rest
-               return $ Atom atom
+parseAtom = do 
+    first <- letter <|> initialSymbol
+    rest <- many (letter <|> digit <|> symbol)
+    let atom = first : rest
+    return $ case atom of 
+        "#t" -> Bool True
+        "#f" -> Bool False
+        _    -> Atom atom
 
--- These are special atoms defined in R5RS spec that begin with "unallowed" symbols
-parsePeculiarAtom :: Parser LispVal
-parsePeculiarAtom = liftM Atom $ try (string "...") <|> string "+" <|> string "-"
-
-parsePound :: Parser LispVal
-parsePound = do
-  char '#'
-  x <- anyChar
-  if (x == '\\') then
-      parseChar
-      else do
-          y <- (do {char '#'; anyChar} <|> return '#')
-          case (sort (x:y:[])) of
-            "#t" -> return $ Bool True
-            "#f" -> return $ Bool False
-            "#d" -> parseDec '?'
-            "#b" -> parseBin '?'
-            "#o" -> parseOct '?'
-            "#x" -> parseHex '?'
-            "#e" -> parseDec 'e'
-            "#i" -> parseDec 'i'
-            "di" -> parseDec 'i'
-            "bi" -> parseBin 'i'
-            "io" -> parseOct 'i'
-            "ix" -> parseHex 'i'
-            "de" -> parseDec 'e'
-            "be" -> parseBin 'e'
-            "eo" -> parseOct 'e'
-            "ex" -> parseHex 'e'
-
-parseChar :: Parser LispVal
-parseChar = do ident <- many (noneOf " ")
-               case length ident of
-                 0 -> return $ Char ' ' -- Will eventually need to be more robust.
-                 1 -> return $ Char (head ident)
-                 _ -> return $ Char ((\(Just x) -> x) (Map.lookup ident charIDs))
-
---I'll let Haskell infer for now
-parseNumber b (f,g) d p' = do 
-  predec <- many1 d
-  dec <- (do {char '.'; many d} <|> return "!")
-  expchar <- (do {oneOf expChars} <|> return '!')
-  exp <- (if expchar /= '!' then many d else return "0")
-  let p = (if p' == '?' then if (dec /= "!" || expchar /= '!') then 'i' else 'e' else p')
-  let r = if (dec == "!" && expchar == '!') then (Number ((fh (f ("0" ++ predec))) * (round b) ^ (fh (f exp))))
-              else if p == 'i' then (Float (((fh (g ("0" ++ predec ++ "." ++ dec ++ "0" )))) * b ^ (fh (f exp))))
-                       else (Rational ((((fh (f ("0" ++ predec))) % 1) + ((fh (f ("0" ++ dec))) % (round b) ^ (length dec)) * (((round b) ^ (fh (f (exp)))) % 1))))
-  return r
+parseNumber :: Parser LispVal
+parseNumber = many1 digit >>= \s ->
+    case reads s of
+        [(n, _)] -> return (Number n)
+        _ -> fail ""
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
-        <|> parsePeculiarAtom
         <|> parseString
-        <|> parseDec '?'
-        <|> parsePound
+        <|> parseNumber
         <|> parseQuoted
-        <|> parseQuasiQuoted
-        <|> parseUnquoteSplicing
-        <|> parseUnquote
         <|> parseAnyList
 
+parseList :: Parser LispVal
+parseList = List `fmap` sepBy parseExpr space
+
 parseAnyList :: Parser LispVal
-parseAnyList = do p <- char '('
-                  many space
-                  x <- sepEndBy parseExpr spaces
-                  c <- char '.' <|> char ')'
-                  if c == '.' then do 
-                                y <- spaces >> parseExpr
-                                many space
-                                char ')'
-                                return $ DottedList x y
-                    else do return $ List x
+parseAnyList = do
+    char '('
+    many space
+    x <- sepEndBy parseExpr spaces
+    c <- char '.' <|> char ')'
+    if c == '.'
+        then do 
+          y <- spaces >> parseExpr
+          many space
+          char ')'
+          return $ DottedList x y
+        else return $ List x
 
 parseQuoted :: Parser LispVal
 parseQuoted = do
@@ -146,30 +73,16 @@ parseQuoted = do
   x <- parseExpr
   return $ List [Atom "quote", x]
 
-parseQuasiQuoted :: Parser LispVal
-parseQuasiQuoted = do
-  char '`'
-  x <- parseExpr
-  return $ List [Atom "quasiquote", x]
+parseComment :: Parser LispVal
+parseComment = do
+    char '\''
+    x <- parseExpr
+    return $ List [Atom "quote", x]
 
-parseUnquote :: Parser LispVal
-parseUnquote = do
-  try (char ',')
-  x <- parseExpr
-  return $ List [Atom "unquote", x]
-
-parseUnquoteSplicing :: Parser LispVal
-parseUnquoteSplicing = do
-  try (string ",@")
-  x <- parseExpr
-  return $ List [Atom "unquote-splicing", x]
-
--- Parsing logic
 parseGeneric :: Parser a -> String -> ThrowsError a
 parseGeneric parser input = case parse parser "scheme" input of
                               Left err -> throwError $ Parser err
                               Right val -> return val
 
-
 parseScheme = parseGeneric parseExpr
-parseSchemeList = parseGeneric $ do sepEndBy (try parseExpr) spaces
+parseSchemeList = parseGeneric $ sepEndBy (try parseExpr) spaces
