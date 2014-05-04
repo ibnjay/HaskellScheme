@@ -53,7 +53,7 @@ writeProcLine :: [LispVal] -> IOThrowsError LispVal
 writeProcLine (String x:xs) = writeProc ((String $ x ++ "\n") : xs)
 
 writeProcPrint :: [LispVal] -> IOThrowsError LispVal
-writeProcPrint (x:xs) = writeProc ((String $ show x) : xs)
+writeProcPrint (x:xs) = writeProcLine ((String $ show x) : xs)
 
 readContents :: [LispVal] -> IOThrowsError LispVal
 readContents [String filename] = liftM String $ liftIO $ readFile filename
