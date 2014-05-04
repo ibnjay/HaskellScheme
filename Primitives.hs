@@ -48,4 +48,6 @@ primitives = concat
     , listPrimitives
     , equalPrimitives
     , stringPrimitives
+    , [("number->string", \xs -> case xs of
+        [Number n] -> return $ String (show n))]
     ]
