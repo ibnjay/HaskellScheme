@@ -1,5 +1,7 @@
 (load "stdlib.scm")
 
+(define NUM_TRIES 9)
+
 (define (show-status letters word)
     (string-concat
         (map
@@ -18,14 +20,16 @@
         (&& (in-array (car word) picked-letters)
             (game-over? picked-letters (cdr word)))))
 
+(define (lost-game? picked-letters)
+    (<= NUM_TRIES (length picked-letters)))
+
 (define (game-repeated-letter picked-letters word letter)
     (write-line "... you already guessed that.")
     (game picked-letters word))
 
-(define (game-letter-try picked-letters word letter)
-    (write-line (if (in-array letter word)
-        "... success!" "... try again!"))
-    (game (cons letter picked-letters) word))
+(define (game-letter-try result recur)
+    (write-line (if result "... success!" "... try again!"))
+    (recur '()))
 
 (define (game picked-letters word)
     (write-line "")
@@ -36,11 +40,17 @@
     (write (string-append "You guessed: " guess))
 
     (define letter (string-charat 0 guess))
-    (if (game-over? (cons letter picked-letters) word)
+    (define letters2 (cons letter picked-letters))
+    (if (game-over? letters2 word)
         (write-line "... game over, you won!")
         (if (in-array letter picked-letters)
             (game-repeated-letter picked-letters word letter)
-            (game-letter-try picked-letters word letter))))
+            (if (in-array letter word)
+                (game-letter-try #t (lambda (x) (game letters2 word)))
+                (if (lost-game? letters2)
+                    (write-line "... game over, you lost!")
+                    (game-letter-try #f (lambda (x) (game letters2 word))))
+                ))))
 
 (write "Pick a difficulty [easy/medium/hard]: ")
 
