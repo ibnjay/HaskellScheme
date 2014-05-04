@@ -6,6 +6,7 @@ import Eval (bindVars)
 import Primitives.Equal
 import Primitives.IO
 import Primitives.List
+import Primitives.String
 
 import Unpackers
 
@@ -38,6 +39,7 @@ primitives = [("+", numericBinop (+)),
               ("string<=?", strBoolBinop (<=)),
               ("string>=?", strBoolBinop (>=)),
               ("string-append", strAppend),
+              ("string-split", strSplit),
 			        ("char-list", strToChars),
               ("list-index", listIndex),
               ("car", car),
@@ -61,18 +63,3 @@ boolBinop unpacker op args = if length args /= 2
 numBoolBinop = boolBinop unpackNum
 strBoolBinop = boolBinop unpackStr
 boolBoolBinop = boolBinop unpackBool
-
-strAppend :: [LispVal] -> ThrowsError LispVal
-strAppend [String s] = return $ String s
-strAppend (String s:ss) = do
-  rest <- strAppend ss
-  case rest of
-    String s' -> return $ String $ s ++ s'
-    _ -> throwError $ TypeMismatch "string" rest
-strAppend [badType] = throwError $ TypeMismatch "string" badType
-strAppend badArgList = throwError $ NumArgs 1 badArgList
-
-strToChars :: [LispVal] -> ThrowsError LispVal
-strToChars [String s] = return $ List $ map Char s
-strToChars [badType] = throwError $ TypeMismatch "string" badType
-strToChars badArgList = throwError $ NumArgs 1 badArgList
