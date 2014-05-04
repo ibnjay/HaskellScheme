@@ -15,27 +15,37 @@ primitiveBindings = nullEnv >>= (flip bindVars $ map (makeFunc IOFunc) ioPrimiti
                                 ++ map (makeFunc PrimitiveFunc) primitives)
     where makeFunc constructor (var, func) = (var, constructor func)
 
---Primitives:
+
+numericPrimitives =
+    [ ("+", numericBinop (+))
+    , ("-", numericBinop (-))
+    , ("*", numericBinop (*))
+    , ("/", numericBinop div)
+    , ("mod", numericBinop mod)
+    , ("quotient", numericBinop quot)
+    , ("remainder", numericBinop rem)
+    ]
+
+numBoolPrimitives =
+    [ ("=", numBoolBinop (==))
+    , ("<", numBoolBinop (<))
+    , (">", numBoolBinop (>))
+    , ("/=", numBoolBinop (/=))
+    , (">=", numBoolBinop (>=))
+    , ("<=", numBoolBinop (<=))
+    ]
+
+boolBoolPrimitives =
+    [ ("&&", boolBoolBinop (&&))
+    , ("||", boolBoolBinop (||))
+    ]
+
 primitives :: [(String, [LispVal] -> ThrowsError LispVal)]
-primitives = [("+", numericBinop (+)),
-              ("-", numericBinop (-)),
-              ("*", numericBinop (*)),
-              ("/", numericBinop div),
-              ("mod", numericBinop mod),
-              ("quotient", numericBinop quot),
-              ("remainder", numericBinop rem),
-              ("=", numBoolBinop (==)),
-              ("<", numBoolBinop (<)),
-              (">", numBoolBinop (>)),
-              ("/=", numBoolBinop (/=)),
-              (">=", numBoolBinop (>=)),
-              ("<=", numBoolBinop (<=)),
-              ("&&", boolBoolBinop (&&)),
-              ("||", boolBoolBinop (||)),
-              ("list-index", listIndex),
-              ("car", car),
-              ("cdr", cdr),
-              ("cons", cons),
-              ("eq?", eqv),
-              ("eqv?", eqv),
-              ("equal?", equal)] ++ stringPrimitives
+primitives = concat
+    [ numericPrimitives
+    , numBoolPrimitives
+    , boolBoolPrimitives
+    , listPrimitives
+    , equalPrimitives
+    , stringPrimitives
+    ]

@@ -25,3 +25,11 @@ cons [x, List xs] = return $ List $ x : xs
 cons [x, DottedList xs xlast] = return $ DottedList (x : xs) xlast
 cons [x1, x2] = return $ DottedList [x1] x2
 cons badArgList = throwError $ NumArgs 2 badArgList
+
+listPrimitives =
+    [ ("list-index", listIndex)
+    , ("car", car)
+    , ("cdr", cdr)
+    , ("cons", cons)
+    ]
+    

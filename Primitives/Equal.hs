@@ -26,3 +26,9 @@ equal [arg1, arg2] = do
       else do primitiveEquals <- liftM or $ mapM (unpackEquals arg1 arg2) 
                      [AnyUnpacker unpackNum, AnyUnpacker unpackStr, AnyUnpacker unpackBool]
               return $ Bool $ primitiveEquals
+
+equalPrimitives =
+    [ ("eq?", eqv)
+    , ("eqv?", eqv)
+    , ("equal?", equal)
+    ]
