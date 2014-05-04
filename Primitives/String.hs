@@ -18,6 +18,10 @@ strToChars [String s] = return $ List $ map Char s
 strToChars [badType] = throwError $ TypeMismatch "string" badType
 strToChars badArgList = throwError $ NumArgs 1 badArgList
 
+strCons :: [LispVal] -> ThrowsError LispVal
+strCons [Char c, String s] = return $ String (c : s)
+strCons badArgList = throwError $ NumArgs 2 badArgList
+
 strSplit :: [LispVal] -> ThrowsError LispVal
 strSplit [String sep, String s] = return . List . map String $ splitOn sep s
 strSplit badArgList = throwError $ NumArgs 2 badArgList
