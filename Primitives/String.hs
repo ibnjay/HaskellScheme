@@ -2,6 +2,7 @@ module Primitives.String where
 
 import Data.List.Split (splitOn)
 import Datatypes
+import Primitives.Operators
 
 strAppend :: [LispVal] -> ThrowsError LispVal
 strAppend [String s] = return $ String s
@@ -25,3 +26,15 @@ strCons badArgList = throwError $ NumArgs 2 badArgList
 strSplit :: [LispVal] -> ThrowsError LispVal
 strSplit [String sep, String s] = return . List . map String $ splitOn sep s
 strSplit badArgList = throwError $ NumArgs 2 badArgList
+
+stringPrimitives = 
+    [ ("string=?", strBoolBinop (==))
+    , ("string<?", strBoolBinop (<))
+    , ("string>?", strBoolBinop (>))
+    , ("string<=?", strBoolBinop (<=))
+    , ("string>=?", strBoolBinop (>=))
+    , ("string-append", strAppend)
+    , ("string-split", strSplit)
+    , ("char-list", strToChars)
+    , ("string-cons", strCons)
+    ]
