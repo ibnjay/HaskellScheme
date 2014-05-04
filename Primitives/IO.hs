@@ -1,4 +1,4 @@
-module IOPrimitives (ioPrimitives) where
+module Primitives.IO (ioPrimitives) where
 import System.IO
 import Datatypes
 import Eval (apply, load)
