@@ -49,6 +49,7 @@ parseExpr = parseAtom
         <|> parseNumber
         <|> parseQuoted
         <|> parseAnyList
+        <|> parseComment
 
 parseList :: Parser LispVal
 parseList = List `fmap` sepBy parseExpr space
@@ -75,9 +76,9 @@ parseQuoted = do
 
 parseComment :: Parser LispVal
 parseComment = do
-    char '\''
-    x <- parseExpr
-    return $ List [Atom "quote", x]
+    char ';'
+    x <-  many $ noneOf "\n"
+    return $ List [Atom "quote", String x]
 
 parseGeneric :: Parser a -> String -> ThrowsError a
 parseGeneric parser input = case parse parser "scheme" input of
