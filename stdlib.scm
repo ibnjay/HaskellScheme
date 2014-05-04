@@ -63,6 +63,12 @@
     (list-index n (string->list s)))
 (define (string-concat lst) (foldr (lambda (x y) (string-append x y)) "" lst))
 
+(define (random-choice lst)
+    (list-index (get-random 0 (- (length lst) 1)) lst))
+
+(define lines (curry string-split "\n"))
+(define words (curry string-split " "))
+
 (define (reverse lst) (fold (flip cons) '() lst))
 
 (define (mem-helper pred op) (lambda (acc next) (if (and (not acc) (pred (op next))) next acc)))
