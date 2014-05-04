@@ -81,7 +81,6 @@ showError (Parser parseErr) = "Parse error at " ++ show parseErr
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 
-
 -- Utility functions (exported)
 trapError action = catchError action (return . show)
 
