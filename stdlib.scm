@@ -46,6 +46,20 @@
 (define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
 
 (define (length lst) (fold (lambda (x y) (+ x 1)) 0 lst))
+(define (string-length s) (length (char-list s)))
+
+(define (in-array x lst)
+    (if (null? lst)
+        #f
+        (|| (eqv? (car lst) x) (in-array x (cdr lst)))))
+
+(define (append a b) (foldr cons b a))
+; (print (append '(4 5) '(5 6)))
+
+(define (concat lst) (foldr (lambda (x y) (append x y)) '() lst))
+; (print (concat '( (4 5) (5 6) (6 7) )))
+
+(define (string-concat lst) (foldr (lambda (x y) (string-append x y)) "" lst))
 
 (define (reverse lst) (fold (flip cons) '() lst))
 
