@@ -66,49 +66,50 @@ getVar envRef var = do
         (lookup var env)
 
 setVar :: Env -> String -> LispVal -> IOThrowsError LispVal
-setVar envRef var value = do env <- liftIO $ readIORef envRef
-                             maybe (throwError $ UnboundVar "Setting an unbound variable: " var) 
-                                   (liftIO . (flip writeIORef value))
-                                   (lookup var env)
-                             return value
+setVar envRef var value = do
+    env <- liftIO $ readIORef envRef
+    maybe (throwError $ UnboundVar "Setting an unbound variable" var)
+          (liftIO . (flip writeIORef value))
+          (lookup var env)
+    return value
 
 defineVar :: Env -> String -> LispVal -> IOThrowsError LispVal
 defineVar envRef var value = do 
     alreadyDefined <- liftIO $ isBound envRef var 
     if alreadyDefined 
-       then setVar envRef var value >> return value
-       else liftIO $ do 
-          valueRef <- newIORef value
-          env <- readIORef envRef
-          writeIORef envRef ((var, valueRef) : env)
-          return value
+        then setVar envRef var value >> return value
+        else liftIO $ do
+            valueRef <- newIORef value
+            env <- readIORef envRef
+            writeIORef envRef ((var, valueRef) : env)
+            return value
 
 bindVars :: Env -> [(String, LispVal)] -> IO Env
-bindVars envRef bindings = readIORef envRef >>= extendEnv bindings >>= newIORef
-    where extendEnv bindings env = liftM (++ env) (mapM addBinding bindings)
-          addBinding (var, value) = do ref <- newIORef value
+bindVars envRef bindings = do
+    env  <- readIORef envRef
+    env' <- (++ env) `fmap` (mapM addBinding bindings)
+    newIORef env'
+    where addBinding (var, value) = do ref <- newIORef value
                                        return (var, ref)
 
--- Helpers for Functions
 apply :: LispVal -> [LispVal] -> IOThrowsError LispVal
 apply (PrimitiveFunc func) args = liftThrows $ func args
 apply (Func params varargs body closure) args = 
     if num params /= num args && varargs == Nothing
        then throwError $ NumArgs (num params) args
-       else (liftIO $ bindVars closure $ zip params args) >>= bindVarArgs varargs >>= evalBody
+       else (liftIO $ bindVars closure $ zip params args) >>=
+          bindVarArgs varargs >>=
+          evalBody
     where remainingArgs = drop (length params) args
           num = toInteger . length
           evalBody env = liftM last $ mapM (eval env) body
-          bindVarArgs arg env = case arg of 
-                                  Just argName -> liftIO $ bindVars env [(argName, List $ remainingArgs)]
-                                  Nothing -> return env
+          bindVarArgs (Just argName) env = liftIO $ bindVars env [(argName, List $ remainingArgs)]
+          bindVarArgs Nothing env = return env
 apply (IOFunc func) args = func args
-
 
 makeFunc varargs env params body = return $ Func (map show params) varargs body env
 makeNormalFunc = makeFunc Nothing
 makeVarargs = makeFunc . Just . show
 
--- IO Helpers
 load :: String -> IOThrowsError [LispVal]
 load filename = (liftIO $ readFile filename) >>= liftThrows . parseSchemeList
