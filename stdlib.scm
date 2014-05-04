@@ -69,6 +69,8 @@
 (define (random-choice lst)
     (list-index (get-random 0 (- (length lst) 1)) lst))
 
+(define string-null? (compose null? string->list))
+(define is-alpha? (lambda (w) (in-array w (string->list "abcdefghijklmnopqrstuvwxyz"))))
 (define lines (curry string-split "\n"))
 (define words (curry string-split " "))
 
