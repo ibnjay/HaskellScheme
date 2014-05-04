@@ -70,9 +70,9 @@ parseAnyList = do
 
 parseQuoted :: Parser LispVal
 parseQuoted = do
-  char '\''
-  x <- parseExpr
-  return $ List [Atom "quote", x]
+  	char '\''
+  	x <- parseExpr
+  	return $ List [Atom "quote", x]
 
 parseComment :: Parser LispVal
 parseComment = do
@@ -81,9 +81,9 @@ parseComment = do
     return $ List [Atom "quote", String x]
 
 parseGeneric :: Parser a -> String -> ThrowsError a
-parseGeneric parser input = case parse parser "scheme" input of
-                              Left err -> throwError $ Parser err
-                              Right val -> return val
+parseGeneric parser input = evalParser $ parse parser "" input
+    where evalParser (Left err)  = throwError $ Parser err
+          evalParser (Right val) = return val
 
 parseScheme = parseGeneric parseExpr
 parseSchemeList = parseGeneric $ sepEndBy (try parseExpr) spaces
