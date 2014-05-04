@@ -8,7 +8,7 @@ symbol = initialSymbol <|> oneOf "+-.@"
  
 -- '+', '-', and '.' aren't allowed to be the first character of an atom
 initialSymbol :: Parser Char
-initialSymbol = oneOf "!#$%&*/:<=>?^_~"
+initialSymbol = oneOf "!#$%|&*/:<=>?^_~"
  
 spaces :: Parser ()
 spaces = skipMany1 space
