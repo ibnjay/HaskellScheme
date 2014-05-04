@@ -1,4 +1,5 @@
 module Primitives (primitiveBindings) where
+import Control.Arrow (second)
 import Control.Monad (liftM)
 import Datatypes
 import Eval (bindVars)
@@ -9,12 +10,11 @@ import Primitives.List
 import Primitives.Operators
 import Primitives.String
 
---Primitive environment
 primitiveBindings :: IO Env
-primitiveBindings = nullEnv >>= (flip bindVars $ map (makeFunc IOFunc) ioPrimitives
-                                ++ map (makeFunc PrimitiveFunc) primitives)
-    where makeFunc constructor (var, func) = (var, constructor func)
-
+primitiveBindings = nullEnv >>=
+    (flip bindVars $
+        (second IOFunc `map` ioPrimitives)
+     ++ (second PrimitiveFunc `map` primitives))
 
 numericPrimitives =
     [ ("+", numericBinop (+))
