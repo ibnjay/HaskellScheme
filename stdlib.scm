@@ -63,6 +63,9 @@
     (list-index n (string->list s)))
 (define (string-concat lst) (foldr (lambda (x y) (string-append x y)) "" lst))
 
+(define (init lst) (reverse (cdr (reverse lst))))
+(define (string-init s) (list->string (init (string->list s))))
+
 (define (random-choice lst)
     (list-index (get-random 0 (- (length lst) 1)) lst))
 
