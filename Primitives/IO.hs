@@ -6,6 +6,8 @@ import Control.Monad (liftM)
 import Parser (parseScheme)
 import System.Random (randomIO, randomRIO)
 
+import Primitives.List (foldr2, foldl2)
+
 ioPrimitives :: [(String, [LispVal] -> IOThrowsError LispVal)]
 ioPrimitives = [
     ("apply", applyProc),
@@ -20,7 +22,9 @@ ioPrimitives = [
     ("write-line", writeProcLine),
     ("read-contents", readContents),
     ("read-all", readAll),
-    ("get-random", getRandom)]
+    ("get-random", getRandom),
+    ("foldr", foldr2),
+    ("foldl", foldl2)]
 
 -- Helper functions
 -- Many just shuffle monads around on top of Haskell IO functions

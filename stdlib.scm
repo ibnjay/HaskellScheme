@@ -20,14 +20,14 @@
 (define (odd? num) (= (mod num 2) 1))
 (define (even? num) (= (mod num 2) 0))
 
-(define (foldr func end lst)
-  (if (null? lst)
-      end
-      (func (car lst) (foldr func end (cdr lst)))))
-(define (foldl func accum lst)
-  (if (null? lst)
-      accum
-      (foldl func (func accum (car lst)) (cdr lst))))
+; (define (foldr func end lst)
+;   (if (null? lst)
+;       end
+;       (func (car lst) (foldr func end (cdr lst)))))
+; (define (foldl func accum lst)
+;   (if (null? lst)
+;       accum
+;       (foldl func (func accum (car lst)) (cdr lst))))
 
 (define fold foldl)
 (define reduce fold)
@@ -45,7 +45,7 @@
 (define (max first . rest) (fold (lambda (old new) (if (> old new) old new)) first rest))
 (define (min first . rest) (fold (lambda (old new) (if (< old new) old new)) first rest))
 
-(define (length lst) (fold (lambda (x y) (+ x 1)) 0 lst))
+; (define (length lst) (fold (lambda (x y) (+ x 1)) 0 lst))
 (define (string-length s) (length (string->list s)))
 
 (define (in-array x lst)
