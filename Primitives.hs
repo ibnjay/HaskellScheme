@@ -34,6 +34,7 @@ primitives = [("+", numericBinop (+)),
               ("string<=?", strBoolBinop (<=)),
               ("string>=?", strBoolBinop (>=)),
               ("string-append", strAppend),
+			  ("char-list", strToChars),
               ("car", car),
               ("cdr", cdr),
               ("cons", cons),
@@ -143,3 +144,8 @@ strAppend (String s:ss) = do
     _ -> throwError $ TypeMismatch "string" rest
 strAppend [badType] = throwError $ TypeMismatch "string" badType
 strAppend badArgList = throwError $ NumArgs 1 badArgList
+
+strToChars :: [LispVal] -> ThrowsError LispVal
+strToChars [String s] = return $ List $ map Char s
+strToChars [badType] = throwError $ TypeMismatch "string" badType
+strToChars badArgList = throwError $ NumArgs 1 badArgList

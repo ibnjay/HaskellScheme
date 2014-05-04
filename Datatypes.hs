@@ -56,7 +56,7 @@ showVal (Rational contents) = show contents
 showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (Bool True) = "#t"
 showVal (Bool False) = "#f"
-showVal (Char x) = '#':'\\':x:[]
+showVal (Char x) = show x
 showVal (PrimitiveFunc _) = "<primitive>"
 showVal (Func {params = args, vararg = varargs, body = body, closure = env}) = 
   "(lambda (" ++ unwords (map show args) ++ 
