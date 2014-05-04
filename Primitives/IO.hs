@@ -4,20 +4,23 @@ import Datatypes
 import Eval (apply, load)
 import Control.Monad (liftM)
 import Parser (parseScheme)
+import System.Random (randomIO, randomRIO)
 
 ioPrimitives :: [(String, [LispVal] -> IOThrowsError LispVal)]
-ioPrimitives = [("apply", applyProc),
-                ("open-input-file", makePort ReadMode),
-                ("open-output-file", makePort WriteMode),
-                ("close-input-port", closePort),
-                ("close-output-port", closePort),
-                ("read", readProcAndParse),
-                ("read-line", readProc),
-                ("print", writeProcPrint),
-                ("write", writeProc),
-                ("write-line", writeProcLine),
-                ("read-contents", readContents),
-                ("read-all", readAll)]
+ioPrimitives = [
+    ("apply", applyProc),
+    ("open-input-file", makePort ReadMode),
+    ("open-output-file", makePort WriteMode),
+    ("close-input-port", closePort),
+    ("close-output-port", closePort),
+    ("read", readProcAndParse),
+    ("read-line", readProc),
+    ("print", writeProcPrint),
+    ("write", writeProc),
+    ("write-line", writeProcLine),
+    ("read-contents", readContents),
+    ("read-all", readAll),
+    ("get-random", getRandom)]
 
 -- Helper functions
 -- Many just shuffle monads around on top of Haskell IO functions
@@ -57,3 +60,8 @@ readContents [String filename] = liftM String $ liftIO $ readFile filename
 
 readAll :: [LispVal] -> IOThrowsError LispVal
 readAll [String filename] = liftM List $ load filename
+
+getRandom :: [LispVal] -> IOThrowsError LispVal
+getRandom [] = fmap Number . liftIO $ randomIO
+getRandom [Number a, Number b] = fmap Number . liftIO $ randomRIO (a, b)
+getRandom badArgList = throwError $ NumArgs 2 badArgList

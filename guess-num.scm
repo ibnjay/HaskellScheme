@@ -1,20 +1,20 @@
-(define randnom 5)
+(define randnom (apply get-random 1 100))
 
 (define (guessLower)
-   (write "Guess Lower")
+   (write-line "Guess Lower")
    (guessing-game))
 
 (define (guessHigher)
-   (write "Guess Higher")
+   (write-line "Guess Higher")
    (guessing-game))
 
 (define (guessing-game)
     (define input (apply read-line))
     (if (= input randnom)
-        (write "You were correct!")
+        (write-line "You were correct!")
         (if (> input randnom)
-	    (guessLower)
-		(guessHigher))))
+	          (guessLower)
+         		(guessHigher))))
 
 (define (main)
     (write "Guess a number between 1 - 100: ")
