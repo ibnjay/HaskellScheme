@@ -44,16 +44,20 @@
     (write-line message)
     (game picked-letters word))
 
+(define (game-over message word)
+    (write-line message)
+    (write-line (string-append "The word was: " (list->string word))))
+
 (define (game-input-letter2 game picked-letters word letter)
     (define letters2 (cons letter picked-letters))
     (if (game-over? letters2 word)
-        (write-line "... game over, you won!")
+        (game-over "... game over, you won!" word)
         (if (in-array letter picked-letters)
             (game-recur "... you already guessed that." game picked-letters word)
             (if (in-array letter word)
                 (game-recur "... success!" game letters2 word)
                 (if (lost-game? word letters2)
-                    (write-line "... game over, you lost!")
+                    (game-over "... game over, you lost!" word)
                     (game-recur "... try again!" game letters2 word))
                 ))))
 
