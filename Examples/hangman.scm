@@ -72,7 +72,7 @@
 
     (write "Guess a letter: ")
     (define guess (apply read-line))
-    (write (string-append "You guessed: " (string-cons (string-charat 0 guess) "")))
+    (write (string-append "You guessed: " (char->string (string-charat 0 guess))))
     (game-input-letter game picked-letters word (string->list guess)))
 
 (define (pred input)
