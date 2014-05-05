@@ -9,10 +9,9 @@
             (string-cons x "") "_ "))
         word)))
 
-(define (get-word pred)
-    (define xs (lines (apply read-contents "input/wordsEn.txt")))
-    (define theword (string-init (random-choice xs)))
-    (if (pred theword) theword (get-word pred)))
+(define (get-word words-list pred)
+    (define theword (string-init (random-choice words-list)))
+    (if (pred theword) theword (get-word words-list pred)))
 
 (define (missed-letters word letters)
     (filter (lambda (x) (not (in-array x word))) letters))
@@ -91,6 +90,7 @@
         input
         (get-difficulty))))
 
-(define theword (get-word (pred (get-difficulty))))
+(define words-list (lines (apply read-contents "input/wordsEn.txt")))
+(define theword (get-word words-list (pred (get-difficulty))))
 (write-line (string-append "The word is: " theword))
 (game '() (string->list theword))
