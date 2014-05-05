@@ -62,7 +62,7 @@ showVal (Func {params = args, vararg = varargs, body = body, closure = env}) =
   "(lambda (" ++ unwords (map show args) ++ 
      (case varargs of 
         Nothing -> ""
-        Just arg -> " . " ++ arg) ++ ") ...)"
+        Just arg -> " . " ++ arg) ++ ") " ++ (body >>= showVal) ++ ")"
 showVal (IOFunc _) = "<IO primitive>"
 showVal (Port _) = "<IO port>"
 

@@ -8,7 +8,7 @@ symbol = initialSymbol <|> oneOf "+-.@"
  
 -- '+', '-', and '.' aren't allowed to be the first character of an atom
 initialSymbol :: Parser Char
-initialSymbol = oneOf "!#$%&*/:<=>?^_~"
+initialSymbol = oneOf "!#$%|&*/:<=>?^_~"
  
 spaces :: Parser ()
 spaces = skipMany1 space
@@ -37,6 +37,10 @@ parseAtom = do
         "#f" -> Bool False
         _    -> Atom atom
 
+-- These are special atoms defined in R5RS spec that begin with "unallowed" symbols
+parsePeculiarAtom :: Parser LispVal
+parsePeculiarAtom = liftM Atom $ try (string "...") <|> string "+" <|> string "-"
+
 parseNumber :: Parser LispVal
 parseNumber = many1 digit >>= \s ->
     case reads s of
@@ -45,6 +49,7 @@ parseNumber = many1 digit >>= \s ->
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
+        <|> parsePeculiarAtom
         <|> parseString
         <|> parseNumber
         <|> parseQuoted

@@ -1,4 +1,4 @@
-(define randnom 5)
+(define randnom (apply get-random 1 100))
 
 (define (guessLower)
    (write-line "Guess Lower")
@@ -13,8 +13,8 @@
     (if (= input randnom)
         (write-line "You were correct!")
         (if (> input randnom)
-	    (guessLower)
-		(guessHigher))))
+	          (guessLower)
+         		(guessHigher))))
 
 (define (main)
     (write-line "Guess a number between 1 - 100: ")
