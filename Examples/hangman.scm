@@ -35,9 +35,9 @@
 
 (define (game-input-letter game picked-letters word guess)
     (if (|| (null? guess)
-            (not (is-alpha? (list-index 0 guess))))
+            (not (is-alpha? (car guess))))
         (game-recur "... please enter a letter!" game picked-letters word)
-        (game-input-letter2 game picked-letters word (list-index 0 guess))
+        (game-input-letter2 game picked-letters word (car guess))
     ))
 
 (define (game-recur message game picked-letters word)
