@@ -1,6 +1,6 @@
 (load "stdlib.scm")
 
-(define NUM_TRIES 9)
+(define NUM_TRIES 6)
 
 (define (show-status letters word)
     (string-concat
@@ -14,14 +14,17 @@
     (define theword (string-init (random-choice xs)))
     (if (pred theword) theword (get-word pred)))
 
+(define (missed-letters word letters)
+    (filter (lambda (x) (not (in-array x word))) letters))
+
 (define (game-over? picked-letters word)
     (if (null? word)
         #t
         (&& (in-array (car word) picked-letters)
             (game-over? picked-letters (cdr word)))))
 
-(define (lost-game? picked-letters)
-    (<= NUM_TRIES (length picked-letters)))
+(define (lost-game? word picked-letters)
+    (<= NUM_TRIES (length (missed-letters word picked-letters))))
 
 (define (game-input-letter game picked-letters word guess)
     (if (|| (null? guess)
@@ -42,7 +45,7 @@
             (game-recur "... you already guessed that." game picked-letters word)
             (if (in-array letter word)
                 (game-recur "... success!" game letters2 word)
-                (if (lost-game? letters2)
+                (if (lost-game? word letters2)
                     (write-line "... game over, you lost!")
                     (game-recur "... try again!" game letters2 word))
                 ))))
