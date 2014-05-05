@@ -12,14 +12,16 @@
 (define identity-unit (lambda (a) a))
 
 ; maybe monad
-(define maybe-bind (lambda (a f) (if a (f a) 'Nothing)))
+(define (maybe-bind a f)
+    (if (eq? a 'Nothing) 'Nothing (f a)))
 (define maybe-unit (lambda (a) a))
 
 ; maybe functor
-(define maybe-fmap (lambda (a f) (if a (f a) 'Nothing)))
+(define (maybe-fmap a f)
+    (if (eq? a 'Nothing) 'Nothing (f a)))
 
 ; list functor
 (define list-fmap map)
 
 ; list monad
-(define list-bind (lambda (a f) concat (map f a)))
+(define list-bind (lambda (a f) (concat (map f a))))
