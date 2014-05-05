@@ -67,8 +67,6 @@
     (write (string-append "You guessed: " guess))
     (game-input-letter game picked-letters word (string->list guess)))
 
-(write "Pick a difficulty [easy/medium/hard]: ")
-
 (define (pred input)
     (if (string=? input "easy")
         (lambda (word) (between? 1 5 (string-length word)))
@@ -76,6 +74,14 @@
             (lambda (word) (between? 6 8 (string-length word)))
             (lambda (word) (between? 8 9999 (string-length word)))
         )))
-(define theword (get-word (pred (apply read-line))))
+
+(define get-difficulty (lambda ()
+    (write "Pick a difficulty [easy/medium/hard]: ")
+    (define input (apply read-line))
+    (if (in-array input '("easy" "medium" "hard"))
+        input
+        (get-difficulty))))
+
+(define theword (get-word (pred (get-difficulty))))
 (write-line (string-append "The word is: " theword))
 (game '() (string->list theword))
