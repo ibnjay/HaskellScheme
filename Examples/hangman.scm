@@ -17,6 +17,13 @@
 (define (missed-letters word letters)
     (filter (lambda (x) (not (in-array x word))) letters))
 
+(define (print-hangman letters word)
+    (define n (length (missed-letters word letters)))
+    (apply read-contents
+        (string-append
+            (string-append "Examples/hangman/" (number->string n))
+            ".txt")))
+
 (define (game-over? picked-letters word)
     (if (null? word)
         #t
@@ -52,6 +59,7 @@
 
 (define (game picked-letters word)
     (write-line "")
+    (write-line (print-hangman picked-letters word))
     (write-line (show-status picked-letters word))
 
     (write "Guess a letter: ")
