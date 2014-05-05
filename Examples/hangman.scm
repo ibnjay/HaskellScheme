@@ -2,6 +2,8 @@
 
 (define NUM_TRIES 6)
 
+; print the word with blanks
+; and guessed letters filled in
 (define (show-status letters word)
     (string-concat
         (map
@@ -9,13 +11,16 @@
             (string-cons x "") "_ "))
         word)))
 
+; get a random word from the words list matching the predicate
 (define (get-word words-list pred)
     (define theword (string-init (random-choice words-list)))
     (if (pred theword) theword (get-word words-list pred)))
 
+; return a list of incorrect letters guessed
 (define (missed-letters word letters)
     (filter (lambda (x) (not (in-array x word))) letters))
 
+; print the ASCII hangman
 (define (print-hangman letters word)
     (define n (length (missed-letters word letters)))
     (apply read-contents
@@ -23,12 +28,14 @@
             (string-append "Examples/hangman/" (number->string n))
             ".txt")))
 
+; game-over? detects if every letter of the word has been guessed
 (define (game-over? picked-letters word)
     (if (null? word)
         #t
         (&& (in-array (car word) picked-letters)
             (game-over? picked-letters (cdr word)))))
 
+; lost-game? detects if the number of incorrect letters is equal to 6
 (define (lost-game? word picked-letters)
     (<= NUM_TRIES (length (missed-letters word picked-letters))))
 
