@@ -1,0 +1,71 @@
+module Primitives.IO (ioPrimitives) where
+import System.IO
+import Datatypes
+import Eval (apply, load)
+import Control.Monad (liftM)
+import Parser (parseScheme)
+import System.Random (randomIO, randomRIO)
+
+import Primitives.List (foldr2, foldl2)
+
+ioPrimitives :: [(String, [LispVal] -> IOThrowsError LispVal)]
+ioPrimitives = [
+    ("apply", applyProc),
+    ("open-input-file", makePort ReadMode),
+    ("open-output-file", makePort WriteMode),
+    ("close-input-port", closePort),
+    ("close-output-port", closePort),
+    ("read", readProcAndParse),
+    ("read-line", readProc),
+    ("print", writeProcPrint),
+    ("write", writeProc),
+    ("write-line", writeProcLine),
+    ("read-contents", readContents),
+    ("read-all", readAll),
+    ("get-random", getRandom),
+    ("foldr", foldr2),
+    ("foldl", foldl2)]
+
+-- Helper functions
+-- Many just shuffle monads around on top of Haskell IO functions
+
+applyProc :: [LispVal] -> IOThrowsError LispVal
+applyProc [func, List args] = apply func args
+applyProc (func : args) = apply func args
+
+makePort :: IOMode -> [LispVal] -> IOThrowsError LispVal
+makePort mode [String filename] = liftM Port $ liftIO $ openFile filename mode
+
+closePort :: [LispVal] -> IOThrowsError LispVal
+closePort [Port port] = liftIO $ hClose port >> (return $ Bool True)
+closePort _ = return $ Bool False
+
+readProc :: [LispVal] -> IOThrowsError LispVal
+readProc [] = readProc [Port stdin]
+readProc [Port port] = (liftIO $ String `liftM` hGetLine port) >>= return
+
+readProcAndParse :: [LispVal] -> IOThrowsError LispVal
+readProcAndParse x = readProc x >>= \(String x) -> liftThrows (parseScheme x)
+
+writeProc :: [LispVal] -> IOThrowsError LispVal
+writeProc [obj] = writeProc [obj, Port stdout]
+writeProc [String obj, Port port] = do
+    liftIO $ hPutStr port obj >> hFlush port
+    return $ Bool True
+
+writeProcLine :: [LispVal] -> IOThrowsError LispVal
+writeProcLine (String x:xs) = writeProc ((String $ x ++ "\n") : xs)
+
+writeProcPrint :: [LispVal] -> IOThrowsError LispVal
+writeProcPrint (x:xs) = writeProcLine ((String $ show x) : xs)
+
+readContents :: [LispVal] -> IOThrowsError LispVal
+readContents [String filename] = liftM String $ liftIO $ readFile filename
+
+readAll :: [LispVal] -> IOThrowsError LispVal
+readAll [String filename] = liftM List $ load filename
+
+getRandom :: [LispVal] -> IOThrowsError LispVal
+getRandom [] = fmap Number . liftIO $ randomIO
+getRandom [Number a, Number b] = fmap Number . liftIO $ randomRIO (a, b)
+getRandom badArgList = throwError $ NumArgs 2 badArgList
